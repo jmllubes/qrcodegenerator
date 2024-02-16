@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+	crossorigin="anonymous">
+
+<title>QR Code Generator / Decoder</title>
+
+<link href="../static/img/favicon.png" th:href="@{/img/favicon.png}"
+	rel="shortcut icon" />
+
+</head>
+<body>
+	<div class="container" style="max-width: 75%;">
+		<nav class="navbar navbar-expand-lg">
+			<a class="navbar-brand" href="#"> <img src="../img/favicon.png"
+				width="30" height="30"> QR Code Generator
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse"
+				data-target="#navbarNav" aria-controls="navbarNav"
+				aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item active"><a class="nav-link" href="/">Generate
+					</a></li>
+					<li class="nav-item"><a class="nav-link" href="/decode">Decode</a></li>
+				</ul>
+			</div>
+			<div class="navbar-nav">
+				<a class="nav-item nav-link" href="https://github.com/crni99/"
+					target="_blank" rel="noopener noreferrer">GitHub</a> <a
+					class="nav-item nav-link"
+					href="https://www.linkedin.com/in/crni99/" target="_blank"
+					rel="noopener noreferrer">LinkedIn</a> <a class="nav-item nav-link"
+					href="mailto:andjelicb.ognjen@gmail.com">E-mail</a>
+			</div>
+		</nav>
+	</div>
+
+	<div class="container-sm mt-5" style="max-width: 75%;">
+		<form action="/generate" method="post">
+			<div class="form-group">
+				<label for="inputText">Enter Text</label> <input type="text"
+					autocomplete="off" class="form-control" id="inputText" name="text"
+					required="true" aria-describedby="textHelp"> <small
+					id="textHelp" class="form-text text-muted">Enter the text
+					you want to encode into a QR code.</small>
+			</div>
+			<button type="submit" class="btn btn-primary" id="generateQRCode"
+				style="margin-top: 10px;">Generate QR Code</button>
+		</form>
+
+
+
+		<th:block th:unless="${#strings.isEmpty(text)}">
+			<div class="mt-5" id="qrCodeContainer">
+				<div>
+					<h3>
+						Text: <span th:text="${text}"></span>
+					</h3>
+					<img th:src="${'data:image/png;base64,' + qrcode}"
+						alt="GeneratedQRCode" class="img-fluid rounded" id="qrCodeImage">
+				</div>
+				<div>
+					<button class="btn btn-primary" id="qrCodeDownload"
+						style="margin-top: 10px;">Download</button>
+				</div>
+			</div>
+		</th:block>
+	</div>
+
+	<!-- Vista HTML -->
+	<script>
+		document.getElementById('qrCodeDownload').addEventListener('click', function() {
+			var pdfUrl = '/downloadQRCodePDF'; // URL del controlador que proporciona el PDF
+
+			fetch(pdfUrl)
+					.then(response => response.blob())
+					.then(blob => {
+						var link = document.createElement('a');
+						link.href = URL.createObjectURL(blob);
+						link.download = 'QRCode.pdf'; // Nombre del archivo PDF
+						document.body.appendChild(link);
+						link.click();
+					})
+					.catch(error => console.error('Error al descargar el PDF:', error));
+		});
+
+		function printTicket() {
+			var pdfUrl = '/downloadQRCodePDF'; // URL del controlador que proporciona el PDF del ticket
+
+			fetch(pdfUrl)
+					.then(response => response.blob())
+					.then(blob => {
+						var pdfWindow = window.open('', '_blank');
+						var pdfUrl = URL.createObjectURL(blob);
+						pdfWindow.document.write('<iframe width="100%" height="100%" src="' + pdfUrl + '"></iframe>');
+
+						pdfWindow.document.addEventListener('load', function() {
+							pdfWindow.focus();
+							pdfWindow.print();
+						});
+					})
+					.catch(error => console.error('Error al imprimir el ticket:', error));
+		}
+	</script>
+
+	<button onclick="printTicket()">Imprimir Ticket</button>
+
+	<!--
+        <script>
+        document.getElementById('qrCodeDownload').addEventListener('click',
+                function() {
+                    var imageElement = document.querySelector('#qrCodeImage');
+                    var imageUrl = imageElement.src;
+
+                    fetch(imageUrl).then(response => response.blob()).then(blob => {
+                        var link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'QRCode.jpg';
+                        document.body.appendChild(link);
+                        link.click();
+                    });
+                });
+        </script>
+        -->
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.16.6/dist/umd/popper.min.js"
+		integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+		crossorigin="anonymous"></script>
+
+</body>
+</html>
